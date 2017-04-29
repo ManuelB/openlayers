@@ -1,0 +1,21 @@
+{
+    // Use IntelliSense to learn about possible Node.js debug attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [{
+            "type": "node",
+            "request": "launch",
+            "name": "Launch jsdoc config/jsdoc/api/conf.json",
+            "program": "${workspaceRoot}/node_modules/.bin/jsdoc",
+            "args": ["config/jsdoc/api/index.md", "-c", "config/jsdoc/api/conf.json", "--package", "package.json", "-d", "build/hosted/master/apidoc"]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch jsdoc config/jsdoc/api/generateopenui5controls.json",
+            "program": "${workspaceRoot}/node_modules/.bin/jsdoc",
+            "args": ["config/jsdoc/api/index.md", "-c", "config/jsdoc/api/generateopenui5controls.json", "--package", "package.json", "-d", "build/hosted/master/apidoc"]
+        }
+    ]
+}
