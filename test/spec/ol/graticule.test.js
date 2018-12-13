@@ -1,28 +1,28 @@
-goog.provide('ol.test.Graticule');
+import Graticule from '../../../src/ol/layer/Graticule.js';
+import Map from '../../../src/ol/Map.js';
+import {get as getProjection} from '../../../src/ol/proj.js';
+import Stroke from '../../../src/ol/style/Stroke.js';
+import Text from '../../../src/ol/style/Text.js';
+import Feature from '../../../src/ol/Feature';
 
-goog.require('ol.Graticule');
-goog.require('ol.Map');
-goog.require('ol.proj');
-goog.require('ol.style.Stroke');
-
-
-describe('ol.Graticule', function() {
-  var graticule;
+describe('ol.layer.Graticule', function() {
+  let graticule;
 
   function createGraticule() {
-    graticule = new ol.Graticule({
-      map: new ol.Map({})
+    graticule = new Graticule();
+    new Map({
+      layers: [graticule]
     });
   }
 
   describe('#createGraticule', function() {
     it('creates a graticule without labels', function() {
       createGraticule();
-      var extent = [-25614353.926475704, -7827151.696402049,
+      const extent = [-25614353.926475704, -7827151.696402049,
         25614353.926475704, 7827151.696402049];
-      var projection = ol.proj.get('EPSG:3857');
-      var resolution = 39135.75848201024;
-      var squaredTolerance = resolution * resolution / 4.0;
+      const projection = getProjection('EPSG:3857');
+      const resolution = 39135.75848201024;
+      const squaredTolerance = resolution * resolution / 4.0;
       graticule.updateProjectionInfo_(projection);
       graticule.createGraticule_(extent, [0, 0], resolution, squaredTolerance);
       expect(graticule.getMeridians().length).to.be(13);
@@ -32,15 +32,17 @@ describe('ol.Graticule', function() {
     });
 
     it('creates a graticule with labels', function() {
-      graticule = new ol.Graticule({
-        map: new ol.Map({}),
+      graticule = new Graticule({
         showLabels: true
       });
-      var extent = [-25614353.926475704, -7827151.696402049,
+      new Map({
+        layers: [graticule]
+      });
+      const extent = [-25614353.926475704, -7827151.696402049,
         25614353.926475704, 7827151.696402049];
-      var projection = ol.proj.get('EPSG:3857');
-      var resolution = 39135.75848201024;
-      var squaredTolerance = resolution * resolution / 4.0;
+      const projection = getProjection('EPSG:3857');
+      const resolution = 39135.75848201024;
+      const squaredTolerance = resolution * resolution / 4.0;
       graticule.updateProjectionInfo_(projection);
       graticule.createGraticule_(extent, [0, 0], resolution, squaredTolerance);
       expect(graticule.meridiansLabels_.length).to.be(13);
@@ -53,32 +55,33 @@ describe('ol.Graticule', function() {
 
     it('has a default stroke style', function() {
       createGraticule();
-      var actualStyle = graticule.strokeStyle_;
+      const actualStyle = graticule.strokeStyle_;
 
       expect(actualStyle).not.to.be(undefined);
-      expect(actualStyle instanceof ol.style.Stroke).to.be(true);
+      expect(actualStyle instanceof Stroke).to.be(true);
     });
 
     it('can be configured with a stroke style', function() {
       createGraticule();
-      var customStrokeStyle = new ol.style.Stroke({
+      const customStrokeStyle = new Stroke({
         color: 'rebeccapurple'
       });
-      var styledGraticule = new ol.Graticule({
-        map: new ol.Map({}),
+      const styledGraticule = new Graticule({
+        map: new Map({}),
         strokeStyle: customStrokeStyle
       });
-      var actualStyle = styledGraticule.strokeStyle_;
+      const actualStyle = styledGraticule.strokeStyle_;
 
       expect(actualStyle).not.to.be(undefined);
       expect(actualStyle).to.be(customStrokeStyle);
     });
 
     it('can be configured with label options', function() {
-      var latLabelStyle = new ol.style.Text();
-      var lonLabelStyle = new ol.style.Text();
-      graticule = new ol.Graticule({
-        map: new ol.Map({}),
+      const latLabelStyle = new Text();
+      const lonLabelStyle = new Text();
+      const feature = new Feature();
+      graticule = new Graticule({
+        map: new Map({}),
         showLabels: true,
         lonLabelFormatter: function(lon) {
           return 'lon: ' + lon.toString();
@@ -91,20 +94,54 @@ describe('ol.Graticule', function() {
         lonLabelStyle: lonLabelStyle,
         latLabelStyle: latLabelStyle
       });
-      var extent = [-25614353.926475704, -7827151.696402049,
+      const extent = [-25614353.926475704, -7827151.696402049,
         25614353.926475704, 7827151.696402049];
-      var projection = ol.proj.get('EPSG:3857');
-      var resolution = 39135.75848201024;
-      var squaredTolerance = resolution * resolution / 4.0;
+      const projection = getProjection('EPSG:3857');
+      const resolution = 39135.75848201024;
+      const squaredTolerance = resolution * resolution / 4.0;
       graticule.updateProjectionInfo_(projection);
       graticule.createGraticule_(extent, [0, 0], resolution, squaredTolerance);
       expect(graticule.meridiansLabels_[0].text).to.be('lon: 0');
       expect(graticule.parallelsLabels_[0].text).to.be('lat: 0');
-      expect(graticule.lonLabelStyle_).to.eql(lonLabelStyle);
-      expect(graticule.latLabelStyle_).to.eql(latLabelStyle);
+      expect(graticule.lonLabelStyle_(feature).getText()).to.eql(lonLabelStyle);
+      expect(graticule.latLabelStyle_(feature).getText()).to.eql(latLabelStyle);
       expect(graticule.lonLabelPosition_).to.be(0.9);
       expect(graticule.latLabelPosition_).to.be(0.1);
     });
+
+    it('can be configured with interval limits', function() {
+      graticule = new Graticule({
+        showLabels: true,
+        lonLabelFormatter: function(lon) {
+          return lon.toString();
+        },
+        latLabelFormatter: function(lat) {
+          return lat.toString();
+        },
+        intervals: [10]
+      });
+      new Map({
+        layers: [graticule]
+      });
+      const extent = [-25614353.926475704, -7827151.696402049,
+        25614353.926475704, 7827151.696402049];
+      const projection = getProjection('EPSG:3857');
+      const resolution = 4891.96981025128;
+      const squaredTolerance = resolution * resolution / 4.0;
+      graticule.updateProjectionInfo_(projection);
+      graticule.createGraticule_(extent, [0, 0], resolution, squaredTolerance);
+
+      expect(graticule.meridiansLabels_[0].text).to.be('0');
+      expect(graticule.parallelsLabels_[0].text).to.be('0');
+      expect(graticule.meridiansLabels_[1].text).to.be('-10');
+      expect(graticule.parallelsLabels_[1].text).to.be('-10');
+      expect(graticule.meridiansLabels_[2].text).to.be('-20');
+      expect(graticule.parallelsLabels_[2].text).to.be('-20');
+
+      expect(graticule.getMeridians().length).to.be(37);
+      expect(graticule.getParallels().length).to.be(11);
+    });
+
 
   });
 

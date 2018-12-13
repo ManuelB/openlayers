@@ -1,50 +1,39 @@
-goog.provide('ol.test.interaction.Extent');
-
-goog.require('ol.Map');
-goog.require('ol.MapBrowserPointerEvent');
-goog.require('ol.View');
-goog.require('ol.interaction.Extent');
-goog.require('ol.pointer.PointerEvent');
+import Map from '../../../../src/ol/Map.js';
+import MapBrowserPointerEvent from '../../../../src/ol/MapBrowserPointerEvent.js';
+import View from '../../../../src/ol/View.js';
+import ExtentInteraction from '../../../../src/ol/interaction/Extent.js';
+import PointerEvent from '../../../../src/ol/pointer/PointerEvent.js';
 
 describe('ol.interaction.Extent', function() {
+  let map, interaction;
 
-  var target, map, interaction;
+  const width = 360;
+  const height = 180;
 
-  var width = 360;
-  var height = 180;
+  beforeEach(function() {
+    const target = createMapDiv(width, height);
 
-  beforeEach(function(done) {
-    target = document.createElement('div');
-
-    var style = target.style;
-    style.position = 'absolute';
-    style.left = '-1000px';
-    style.top = '-1000px';
-    style.width = width + 'px';
-    style.height = height + 'px';
-    document.body.appendChild(target);
-
-    map = new ol.Map({
+    map = new Map({
       target: target,
       layers: [],
-      view: new ol.View({
+      view: new View({
         projection: 'EPSG:4326',
         center: [0, 0],
         resolution: 1
       })
     });
+    map.renderSync();
 
-    map.once('postrender', function() {
-      done();
-    });
-
-    interaction = new ol.interaction.Extent();
+    interaction = new ExtentInteraction();
     map.addInteraction(interaction);
   });
 
   afterEach(function() {
-    map.dispose();
-    document.body.removeChild(target);
+    if (map) {
+      disposeMap(map);
+    }
+    map = null;
+    interaction = null;
   });
 
   /**
@@ -57,21 +46,35 @@ describe('ol.interaction.Extent', function() {
    * @param {number} button The mouse button.
    */
   function simulateEvent(type, x, y, opt_shiftKey, button) {
-    var viewport = map.getViewport();
+    const viewport = map.getViewport();
     // calculated in case body has top < 0 (test runner with small window)
-    var position = viewport.getBoundingClientRect();
-    var shiftKey = opt_shiftKey !== undefined ? opt_shiftKey : false;
-    var pointerEvent = new ol.pointer.PointerEvent(type, {
+    const position = viewport.getBoundingClientRect();
+    const shiftKey = opt_shiftKey !== undefined ? opt_shiftKey : false;
+    const pointerEvent = new PointerEvent(type, {
       type: type,
       button: button,
       clientX: position.left + x + width / 2,
       clientY: position.top - y + height / 2,
-      shiftKey: shiftKey
+      shiftKey: shiftKey,
+      preventDefault: function() {}
     });
-    var event = new ol.MapBrowserPointerEvent(type, map, pointerEvent);
+    const event = new MapBrowserPointerEvent(type, map, pointerEvent);
     event.pointerEvent.pointerId = 1;
     map.handleMapBrowserEvent(event);
   }
+
+  describe('Constructor', function() {
+
+    it('can be configured with an extent', function() {
+      expect(function() {
+        new ExtentInteraction({
+          extent: [-10, -10, 10, 10]
+        });
+      }).to.not.throwException();
+    });
+
+  });
+
   describe('snap to vertex', function() {
     it('snap to vertex works', function() {
       interaction.setExtent([-50, -50, 50, 50]);
@@ -79,6 +82,7 @@ describe('ol.interaction.Extent', function() {
       expect(interaction.snapToVertex_([230, 40], map)).to.eql([50, 50]);
       expect(interaction.snapToVertex_([231, 41], map)).to.eql([50, 50]);
     });
+
     it('snap to edge works', function() {
       interaction.setExtent([-50, -50, 50, 50]);
 

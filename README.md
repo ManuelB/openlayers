@@ -1,17 +1,45 @@
 # OpenLayers
 
-[![Travis CI Status](https://secure.travis-ci.org/openlayers/openlayers.svg)](http://travis-ci.org/#!/openlayers/openlayers)
-[![Greenkeeper badge](https://badges.greenkeeper.io/openlayers/openlayers.svg)](https://greenkeeper.io/)
-[![Coverage Status](https://coveralls.io/repos/github/openlayers/openlayers/badge.svg?branch=master)](https://coveralls.io/github/openlayers/openlayers?branch=master)
-[![OSGeo Project](https://img.shields.io/badge/OSGeo-Project-brightgreen.svg)](http://osgeo.org/)
-
 [OpenLayers](https://openlayers.org/) is a high-performance, feature-packed library for creating interactive maps on the web. It can display map tiles, vector data and markers loaded from any source on any web page. OpenLayers has been developed to further the use of geographic information of all kinds. It is completely free, Open Source JavaScript, released under the 2-clause BSD License (also known as the FreeBSD).
 
 ## Getting Started
 
-- Download the [latest release](https://openlayers.org/download/)
-- Install with npm: `npm install openlayers`
-- Clone the repo: `git clone git@github.com:openlayers/openlayers.git`
+Install the [`ol` package](https://www.npmjs.com/package/ol):
+
+```
+npm install ol
+```
+
+Import just what you need for your application:
+
+```js
+import Map from 'ol/Map';
+import View from 'ol/View';
+import TileLayer from 'ol/layer/Tile';
+import XYZ from 'ol/source/XYZ';
+
+new Map({
+  target: 'map',
+  layers: [
+    new TileLayer({
+      source: new XYZ({
+        url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+      })
+    })
+  ],
+  view: new View({
+    center: [0, 0],
+    zoom: 2
+  })
+});
+```
+
+See the following examples for more detail on bundling OpenLayers with your application:
+
+ * Using [Rollup](https://github.com/openlayers/ol-rollup)
+ * Using [Webpack](https://github.com/openlayers/ol-webpack)
+ * Using [Parcel](https://github.com/openlayers/ol-parcel)
+ * Using [Browserify](https://github.com/openlayers/ol-browserify)
 
 ## Supported Browsers
 
@@ -33,4 +61,5 @@ Please see our guide on [contributing](CONTRIBUTING.md) if you're interested in 
 
 - Need help? Find it on [Stack Overflow using the tag 'openlayers'](http://stackoverflow.com/questions/tagged/openlayers)
 - Follow [@openlayers](https://twitter.com/openlayers) on Twitter
-- Discuss with openlayers users on IRC in `#openlayers` at `chat.freenode`
+
+[![CircleCI](https://circleci.com/gh/openlayers/openlayers/tree/master.svg?style=svg)](https://circleci.com/gh/openlayers/openlayers/tree/master)
